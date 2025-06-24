@@ -2,4 +2,34 @@
 
 <h2>Welcome <%= user.name %></h2>
 <p>Your role: <%= user.role %></p>
+
+<% if (messages.error && messages.error.length > 0) { %>
+  <div style="color: red; margin-bottom: 10px;"><%= messages.error[0] %></div>
+<% } %>
+
+<% if (messages.success && messages.success.length > 0) { %>
+  <div style="color: green; margin-bottom: 10px;"><%= messages.success[0] %></div>
+<% } %>
+
+<% if (user.role === 'Talker') { %>
+  <form method="POST" action="/chat/request">
+    <button type="submit">Request to Talk</button>
+  </form>
+<% } %>
+
 <a href="/auth/logout">Logout</a>
+
+<% if (user.role === 'Listener') { %>
+  <script>
+   
+    setInterval(() => {
+      fetch('/api/check-session')
+        .then(res => res.json())
+        .then(data => {
+          if (data.sessionId) {
+            window.location.href = `/chat/room/${data.sessionId}`;
+          }
+        });
+    }, 2000); 
+  </script>
+<% } %>

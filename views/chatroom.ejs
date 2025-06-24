@@ -1,0 +1,40 @@
+<% layout('layout') -%>
+
+<h2>Private Chat Room</h2>
+<p><strong>Talker:</strong> <%= session.talker.name %></p>
+<p><strong>Listener:</strong> <%= session.listener.name %></p>
+
+<div id="chat-box" style="border:1px solid #ccc; padding:10px; height:300px; overflow-y:auto; margin-bottom:10px;"></div>
+
+<form id="chat-form">
+  <input id="msg" type="text" placeholder="Type a message..." autocomplete="off" required />
+  <button type="submit">Send</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const roomId = "<%= session._id %>";
+  const sender = "<%= user.name %>";
+
+  socket.emit('joinRoom', roomId);
+
+  const chatBox = document.getElementById('chat-box');
+  const form = document.getElementById('chat-form');
+  const msgInput = document.getElementById('msg');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const message = msgInput.value.trim();
+    if (!message) return;
+    socket.emit('chatMessage', { roomId, sender, message });
+    msgInput.value = '';
+  });
+
+  socket.on('chatMessage', ({ sender, message }) => {
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    chatBox.appendChild(p);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+</script>
